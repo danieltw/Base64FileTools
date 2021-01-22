@@ -76,7 +76,7 @@ namespace Base64FileTools
             try
             {
                 UpdateTransferText("");
-                string _TargetContentText = Convert.ToBase64String(bytTransferFileContent);
+                string _TargetContentText = Convert.ToBase64String(bytTransferFileContent) + Environment.NewLine + Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(TransferFileName));
 
                 if (OutputZip)
                 {
@@ -185,9 +185,10 @@ namespace Base64FileTools
             try
             {
                 UpdateDecodeText("");
-                string _TargetFileName = txtSavePath.Text + (txtSavePath.Text.EndsWith("\\") ? "" : "\\") + SourceFileName.Substring(0, SourceFileName.Length - 4);
                 string _TargetContentText = System.Text.Encoding.Unicode.GetString(bytSourceFileContent);
-
+                string _TargetFileName = _TargetContentText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[1];
+                _TargetContentText = _TargetContentText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0];
+                _TargetFileName = txtSavePath.Text + (txtSavePath.Text.EndsWith("\\") ? "" : "\\") + System.Text.Encoding.Unicode.GetString(Convert.FromBase64String(_TargetFileName));
                 using (FileStream tmpFS = new FileStream(_TargetFileName, FileMode.OpenOrCreate, FileAccess.Write))
                 {
                     byte[] _Buffer = Convert.FromBase64String(_TargetContentText);
