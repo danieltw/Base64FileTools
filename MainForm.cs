@@ -88,7 +88,7 @@ namespace Base64FileTools
                             ZipArchiveEntry tmpEntry = tmpZipFile.CreateEntry(TransferFileName + ".txt");
                             using (Stream _stm = tmpEntry.Open())
                             {
-                                byte[] _bufferData = System.Text.Encoding.Unicode.GetBytes(_TargetContentText);
+                                byte[] _bufferData = System.Text.Encoding.ASCII.GetBytes(_TargetContentText);
                                 _stm.Write(_bufferData, 0, _bufferData.Length);
                             }
                         }
@@ -98,7 +98,7 @@ namespace Base64FileTools
                 else
                 {
                     string _TargetFileName = txtTransferSavePath.Text + (txtTransferSavePath.Text.EndsWith("\\") ? "" : "\\") + TransferFileName + ".txt";
-                    byte[] _Buffer = System.Text.Encoding.Unicode.GetBytes(_TargetContentText);
+                    byte[] _Buffer = System.Text.Encoding.ASCII.GetBytes(_TargetContentText);
                     System.IO.File.WriteAllBytes(_TargetFileName, _Buffer);
                 }
                 UpdateTransferText("檔案轉碼成功!");
@@ -185,9 +185,18 @@ namespace Base64FileTools
             try
             {
                 UpdateDecodeText("");
-                string _TargetContentText = System.Text.Encoding.Unicode.GetString(bytSourceFileContent);
-                string _TargetFileName = _TargetContentText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[1];
-                _TargetContentText = _TargetContentText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0];
+                string _TargetContentText = System.Text.Encoding.ASCII.GetString(bytSourceFileContent);
+                string _TargetFileName = "";
+                if (_TargetContentText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).Length == 1)
+                {
+                    _TargetFileName = SourceFileName.Substring(0, SourceFileName.Length - 4);
+                }
+                else
+                {
+                    _TargetFileName = _TargetContentText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[1];
+                    _TargetContentText = _TargetContentText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0];
+                }
+
                 _TargetFileName = txtSavePath.Text + (txtSavePath.Text.EndsWith("\\") ? "" : "\\") + System.Text.Encoding.Unicode.GetString(Convert.FromBase64String(_TargetFileName));
                 using (FileStream tmpFS = new FileStream(_TargetFileName, FileMode.OpenOrCreate, FileAccess.Write))
                 {
