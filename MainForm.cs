@@ -13,79 +13,112 @@ namespace Base64FileTools
             InitializeComponent();
         }
 
-        private string TransferFileName { get; set; }
-        private byte[] bytTransferFileContent { get; set; }
+        private string EncodeFileName { get; set; }
+        private byte[] bytEncodeFileContent { get; set; }
 
-        private string SourceFileName { get; set; }
-        private byte[] bytSourceFileContent { get; set; }
+        private string DecodeFileName { get; set; }
+        private byte[] bytDecodeFileContent { get; set; }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
             this.Icon = Properties.Resources.BICON;
         }
 
-        #region 檔案轉碼
-        private void btnSelectTransferFile_Click(object sender, EventArgs e)
+        #region File Encode
+        private void btnSelectEncodeFile_Click(object sender, EventArgs e)
         {
             try
             {
-                if (dlgSelectTransferFile.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
-                txtTransferFileName.Text = dlgSelectTransferFile.FileName;
-                txtTransferError.Text = "";
-                FileInfo tmpFI = new FileInfo(txtTransferFileName.Text);
-                TransferFileName = tmpFI.Name;
-                using (FileStream tmpFS = new FileStream(txtTransferFileName.Text, FileMode.Open, FileAccess.Read))
-                {
-                    bytTransferFileContent = new byte[tmpFS.Length];
-                    tmpFS.Read(bytTransferFileContent, 0, (int)tmpFS.Length);
-                }
-                txtTransferError.Text = "檔案讀取完成!";
+                if (dlgSelectEncodeFile.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+                txtEncodeFileName.Text = dlgSelectEncodeFile.FileName;
+                LoadEncodeFile();
             }
             catch (Exception ex)
             {
-                txtTransferError.Text = ex.Message;
+                txtEncodeMessage.Text = string.Format("Error : {0}", ex.Message);
             }
         }
 
-        private void btnSelectTransferSavePath_Click(object sender, EventArgs e)
+        private void btnSelectEncodeOutputPath_Click(object sender, EventArgs e)
         {
             try
             {
-                if (dlgSelectPath.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
-                txtTransferError.Text = "";
-                txtTransferSavePath.Text = dlgSelectPath.SelectedPath;
+                if (dlgSelectOutputPath.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+                txtEncodeMessage.Text = "";
+                txtEncodeOutputPath.Text = dlgSelectOutputPath.SelectedPath;
             }
             catch (Exception ex)
             {
-                txtTransferError.Text = ex.Message;
+                txtEncodeMessage.Text = string.Format("Error : {0}", ex.Message);
             }
         }
 
         private void btnExecuteEncode_Click(object sender, EventArgs e)
         {
-            if (txtTransferFileName.Text == "" || txtTransferSavePath.Text == "") return;
-            bool _OutputCompressFile = chkCompress.Checked;
+            if (txtEncodeFileName.Text == "" || txtEncodeOutputPath.Text == "") return;
 
             btnExecuteEncode.Enabled = false;
-            Thread trdEncode = new Thread(() => ConvertToBase64(_OutputCompressFile));
+            Thread trdEncode = new Thread(() => ConvertToBase64(chkOutputArchivedFile.Checked));
             trdEncode.Start();
+        }
+
+        private void tpgEncode_DragDrop(object sender, DragEventArgs e)
+        {
+            var _files = e.Data.GetData("FileDrop");
+
+            if ((_files as string[]).Length > 1)
+            {
+                UpdateEncodeMessageText("Error : only allow one file at one time!");
+                return;
+            }
+            else if ((_files as string[]).Length < 1)
+            {
+                return;
+            }
+            txtEncodeFileName.Text = (_files as string[])[0];
+            LoadEncodeFile();
+        }
+
+        private void tpgEncode_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.Copy;
+        }
+
+        private void LoadEncodeFile()
+        {
+            try
+            {
+                txtEncodeMessage.Text = "";
+                FileInfo tmpFI = new FileInfo(txtEncodeFileName.Text);
+                EncodeFileName = tmpFI.Name;
+                using (FileStream tmpFS = new FileStream(txtEncodeFileName.Text, FileMode.Open, FileAccess.Read))
+                {
+                    bytEncodeFileContent = new byte[tmpFS.Length];
+                    tmpFS.Read(bytEncodeFileContent, 0, (int)tmpFS.Length);
+                }
+                txtEncodeMessage.Text = "Info : Read file finish!";
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         private void ConvertToBase64(bool OutputZip)
         {
             try
             {
-                UpdateTransferText("");
-                string _TargetContentText = Convert.ToBase64String(bytTransferFileContent) + Environment.NewLine + Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(TransferFileName));
+                UpdateEncodeMessageText("");
+                string _TargetContentText = Convert.ToBase64String(bytEncodeFileContent) + Environment.NewLine + Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(EncodeFileName));
 
                 if (OutputZip)
                 {
-                    string _TargetFileName = txtTransferSavePath.Text + (txtTransferSavePath.Text.EndsWith("\\") ? "" : "\\") + TransferFileName + ".zip";
+                    string _TargetFileName = txtEncodeOutputPath.Text + (txtEncodeOutputPath.Text.EndsWith("\\") ? "" : "\\") + EncodeFileName + ".zip";
                     using (MemoryStream _ms = new MemoryStream())
                     {
                         using (ZipArchive tmpZipFile = new ZipArchive(_ms, ZipArchiveMode.Create))
                         {
-                            ZipArchiveEntry tmpEntry = tmpZipFile.CreateEntry(TransferFileName + ".txt");
+                            ZipArchiveEntry tmpEntry = tmpZipFile.CreateEntry(EncodeFileName + ".txt");
                             using (Stream _stm = tmpEntry.Open())
                             {
                                 byte[] _bufferData = System.Text.Encoding.ASCII.GetBytes(_TargetContentText);
@@ -97,15 +130,15 @@ namespace Base64FileTools
                 }
                 else
                 {
-                    string _TargetFileName = txtTransferSavePath.Text + (txtTransferSavePath.Text.EndsWith("\\") ? "" : "\\") + TransferFileName + ".txt";
+                    string _TargetFileName = txtEncodeOutputPath.Text + (txtEncodeOutputPath.Text.EndsWith("\\") ? "" : "\\") + EncodeFileName + ".txt";
                     byte[] _Buffer = System.Text.Encoding.ASCII.GetBytes(_TargetContentText);
                     System.IO.File.WriteAllBytes(_TargetFileName, _Buffer);
                 }
-                UpdateTransferText("檔案轉碼成功!");
+                UpdateEncodeMessageText("Info : Encode Successfull.");
             }
             catch (Exception ex)
             {
-                UpdateTransferText(ex.Message);
+                UpdateEncodeMessageText(string.Format("Error : {0}", ex.Message));
             }
             finally
             {
@@ -121,75 +154,110 @@ namespace Base64FileTools
             }
         }
 
-        private void UpdateTransferText(string text)
+        private void UpdateEncodeMessageText(string text)
         {
             if (this.InvokeRequired)
             {
-                Action action = () => { txtTransferError.Text = text; };
+                Action action = () => { txtEncodeMessage.Text = text; };
                 this.Invoke(action);
             }
             else
             {
-                txtTransferError.Text = text;
+                txtEncodeMessage.Text = text;
             }
         }
         #endregion
 
-        #region 檔案回復
-        private void btnSelectSourceFIle_Click(object sender, EventArgs e)
+        #region File Decode
+        private void btnSelectDecodeFile_Click(object sender, EventArgs e)
         {
             try
             {
-                if (dlgSelectSourceFile.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
-                txtSourceFileName.Text = dlgSelectSourceFile.FileName;
-                txtDecodeError.Text = "";
-                FileInfo tmpFI = new FileInfo(txtSourceFileName.Text);
-                SourceFileName = tmpFI.Name;
-                using (FileStream tmpFS = new FileStream(txtSourceFileName.Text, FileMode.Open, FileAccess.Read))
-                {
-                    bytSourceFileContent = new byte[tmpFS.Length];
-                    tmpFS.Read(bytSourceFileContent, 0, (int)tmpFS.Length);
-                }
-                txtDecodeError.Text = "檔案讀取完成!";
+                if (dlgSelectDecodeFile.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+                txtDecodeFileName.Text = dlgSelectDecodeFile.FileName;
+                LoadDecodeFile();
             }
             catch (Exception ex)
             {
-                txtDecodeError.Text = ex.Message;
+                txtDecodeMessage.Text = string.Format("Error : {0}", ex.Message);
             }
         }
 
-        private void btnSavePath_Click(object sender, EventArgs e)
+        private void btnSelectDecodeOutputPath_Click(object sender, EventArgs e)
         {
             try
             {
-                if (dlgSelectPath.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
-                txtDecodeError.Text = "";
-                txtSavePath.Text = dlgSelectPath.SelectedPath;
+                if (dlgSelectOutputPath.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+                txtDecodeMessage.Text = "";
+                txtDecodeOutputPath.Text = dlgSelectOutputPath.SelectedPath;
             }
             catch (Exception ex)
             {
-                txtDecodeError.Text = ex.Message;
+                txtDecodeMessage.Text = string.Format("Error : {0}", ex.Message);
             }
         }
 
         private void btnExecuteDecode_Click(object sender, EventArgs e)
         {
-            if (txtSourceFileName.Text == "" || txtSavePath.Text == "") return;
+            if (txtDecodeFileName.Text == "" || txtDecodeOutputPath.Text == "") return;
             btnExecuteDecode.Enabled = false;
             Thread trdDecode = new Thread(() => ConvertFromBase64());
             trdDecode.Start();
+        }
+
+        private void tpgDecode_DragDrop(object sender, DragEventArgs e)
+        {
+            var _files = e.Data.GetData("FileDrop");
+
+            if ((_files as string[]).Length > 1)
+            {
+                UpdateEncodeMessageText("Error : only allow one file at one time!");
+                return;
+            }
+            else if ((_files as string[]).Length < 1)
+            {
+                return;
+            }
+            txtDecodeFileName.Text = (_files as string[])[0];
+            LoadDecodeFile();
+        }
+
+        private void tpgDecode_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.Copy;
+        }
+
+        private void LoadDecodeFile()
+        {
+            try
+            {
+                txtDecodeMessage.Text = "";
+                FileInfo tmpFI = new FileInfo(txtDecodeFileName.Text);
+                DecodeFileName = tmpFI.Name;
+                using (FileStream tmpFS = new FileStream(txtDecodeFileName.Text, FileMode.Open, FileAccess.Read))
+                {
+                    bytDecodeFileContent = new byte[tmpFS.Length];
+                    tmpFS.Read(bytDecodeFileContent, 0, (int)tmpFS.Length);
+                }
+                txtDecodeMessage.Text = "Info : Read file finish!";
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         private void ConvertFromBase64()
         {
             try
             {
-                UpdateDecodeText("");
-                string _TargetContentText = System.Text.Encoding.ASCII.GetString(bytSourceFileContent);
+                UpdateDecodeMessageText("");
+                string _TargetContentText = System.Text.Encoding.ASCII.GetString(bytDecodeFileContent);
                 string _TargetFileName = "";
                 if (_TargetContentText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).Length == 1)
                 {
-                    _TargetFileName = SourceFileName.Substring(0, SourceFileName.Length - 4);
+                    _TargetFileName = DecodeFileName.Substring(0, DecodeFileName.Length - 4);
                 }
                 else
                 {
@@ -197,18 +265,18 @@ namespace Base64FileTools
                     _TargetContentText = _TargetContentText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)[0];
                 }
 
-                _TargetFileName = txtSavePath.Text + (txtSavePath.Text.EndsWith("\\") ? "" : "\\") + System.Text.Encoding.Unicode.GetString(Convert.FromBase64String(_TargetFileName));
+                _TargetFileName = txtDecodeOutputPath.Text + (txtDecodeOutputPath.Text.EndsWith("\\") ? "" : "\\") + System.Text.Encoding.Unicode.GetString(Convert.FromBase64String(_TargetFileName));
                 using (FileStream tmpFS = new FileStream(_TargetFileName, FileMode.OpenOrCreate, FileAccess.Write))
                 {
                     byte[] _Buffer = Convert.FromBase64String(_TargetContentText);
                     tmpFS.Write(_Buffer, 0, _Buffer.Length);
                 }
 
-                UpdateDecodeText("檔案回復成功!");
+                UpdateDecodeMessageText("Info : Decode Successfull.");
             }
             catch (Exception ex)
             {
-                UpdateDecodeText(ex.Message);
+                UpdateDecodeMessageText(string.Format("Error : {0}", ex.Message));
             }
             finally
             {
@@ -224,16 +292,16 @@ namespace Base64FileTools
             }
         }
 
-        private void UpdateDecodeText(string text)
+        private void UpdateDecodeMessageText(string text)
         {
             if (this.InvokeRequired)
             {
-                Action action = () => { txtDecodeError.Text = text; };
+                Action action = () => { txtDecodeMessage.Text = text; };
                 this.Invoke(action);
             }
             else
             {
-                txtDecodeError.Text = text;
+                txtDecodeMessage.Text = text;
             }
         }
         #endregion
