@@ -53,6 +53,9 @@
             this.dlgSelectEncodeFile = new System.Windows.Forms.OpenFileDialog();
             this.dlgSelectOutputPath = new System.Windows.Forms.FolderBrowserDialog();
             this.dlgSelectDecodeFile = new System.Windows.Forms.OpenFileDialog();
+            this.chkOutputSplit = new System.Windows.Forms.CheckBox();
+            this.txtSplitSize = new System.Windows.Forms.TextBox();
+            this.labSplitText = new System.Windows.Forms.Label();
             this.tbcMain.SuspendLayout();
             this.tpgEncode.SuspendLayout();
             this.tlpEncode.SuspendLayout();
@@ -70,7 +73,7 @@
             this.tbcMain.Location = new System.Drawing.Point(0, 0);
             this.tbcMain.Name = "tbcMain";
             this.tbcMain.SelectedIndex = 0;
-            this.tbcMain.Size = new System.Drawing.Size(564, 136);
+            this.tbcMain.Size = new System.Drawing.Size(564, 128);
             this.tbcMain.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.tbcMain.TabIndex = 0;
             // 
@@ -81,7 +84,7 @@
             this.tpgEncode.Location = new System.Drawing.Point(4, 26);
             this.tpgEncode.Name = "tpgEncode";
             this.tpgEncode.Padding = new System.Windows.Forms.Padding(3);
-            this.tpgEncode.Size = new System.Drawing.Size(556, 106);
+            this.tpgEncode.Size = new System.Drawing.Size(556, 98);
             this.tpgEncode.TabIndex = 0;
             this.tpgEncode.Text = "File Encode";
             this.tpgEncode.UseVisualStyleBackColor = true;
@@ -90,27 +93,35 @@
             // 
             // tlpEncode
             // 
-            this.tlpEncode.ColumnCount = 3;
+            this.tlpEncode.ColumnCount = 6;
             this.tlpEncode.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 110F));
+            this.tlpEncode.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.tlpEncode.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 48F));
+            this.tlpEncode.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 27F));
             this.tlpEncode.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpEncode.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
             this.tlpEncode.Controls.Add(this.labEncodeFileName, 0, 0);
-            this.tlpEncode.Controls.Add(this.txtEncodeFileName, 1, 0);
             this.tlpEncode.Controls.Add(this.labEncodeOutputPath, 0, 1);
-            this.tlpEncode.Controls.Add(this.txtEncodeOutputPath, 1, 1);
-            this.tlpEncode.Controls.Add(this.txtEncodeMessage, 1, 2);
-            this.tlpEncode.Controls.Add(this.btnSelectEncodeFile, 2, 0);
-            this.tlpEncode.Controls.Add(this.btnSelectEncodeOutputPath, 2, 1);
-            this.tlpEncode.Controls.Add(this.btnExecuteEncode, 2, 2);
+            this.tlpEncode.Controls.Add(this.txtEncodeMessage, 4, 2);
+            this.tlpEncode.Controls.Add(this.btnSelectEncodeFile, 5, 0);
+            this.tlpEncode.Controls.Add(this.btnSelectEncodeOutputPath, 5, 1);
+            this.tlpEncode.Controls.Add(this.btnExecuteEncode, 5, 2);
             this.tlpEncode.Controls.Add(this.chkOutputArchivedFile, 0, 2);
+            this.tlpEncode.Controls.Add(this.txtEncodeOutputPath, 1, 1);
+            this.tlpEncode.Controls.Add(this.txtEncodeFileName, 1, 0);
+            this.tlpEncode.Controls.Add(this.chkOutputSplit, 1, 2);
+            this.tlpEncode.Controls.Add(this.txtSplitSize, 2, 2);
+            this.tlpEncode.Controls.Add(this.labSplitText, 3, 2);
             this.tlpEncode.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpEncode.Location = new System.Drawing.Point(3, 3);
             this.tlpEncode.Name = "tlpEncode";
-            this.tlpEncode.RowCount = 3;
+            this.tlpEncode.RowCount = 4;
+            this.tlpEncode.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tlpEncode.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tlpEncode.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tlpEncode.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpEncode.Size = new System.Drawing.Size(550, 100);
+            this.tlpEncode.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tlpEncode.Size = new System.Drawing.Size(550, 92);
             this.tlpEncode.TabIndex = 0;
             // 
             // labEncodeFileName
@@ -129,6 +140,7 @@
             this.txtEncodeFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.txtEncodeFileName.AutoEllipsis = true;
             this.txtEncodeFileName.AutoSize = true;
+            this.tlpEncode.SetColumnSpan(this.txtEncodeFileName, 4);
             this.txtEncodeFileName.Location = new System.Drawing.Point(113, 9);
             this.txtEncodeFileName.Name = "txtEncodeFileName";
             this.txtEncodeFileName.Size = new System.Drawing.Size(354, 12);
@@ -151,6 +163,7 @@
             this.txtEncodeOutputPath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.txtEncodeOutputPath.AutoEllipsis = true;
             this.txtEncodeOutputPath.AutoSize = true;
+            this.tlpEncode.SetColumnSpan(this.txtEncodeOutputPath, 4);
             this.txtEncodeOutputPath.Location = new System.Drawing.Point(113, 39);
             this.txtEncodeOutputPath.Name = "txtEncodeOutputPath";
             this.txtEncodeOutputPath.Size = new System.Drawing.Size(354, 12);
@@ -162,11 +175,11 @@
             this.txtEncodeMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.txtEncodeMessage.AutoSize = true;
             this.txtEncodeMessage.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.txtEncodeMessage.Location = new System.Drawing.Point(113, 74);
+            this.txtEncodeMessage.Location = new System.Drawing.Point(288, 69);
             this.txtEncodeMessage.Name = "txtEncodeMessage";
-            this.txtEncodeMessage.Size = new System.Drawing.Size(354, 12);
+            this.txtEncodeMessage.Size = new System.Drawing.Size(179, 12);
             this.txtEncodeMessage.TabIndex = 4;
-            this.txtEncodeMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.txtEncodeMessage.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // btnSelectEncodeFile
             // 
@@ -194,7 +207,7 @@
             // 
             this.btnExecuteEncode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.btnExecuteEncode.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.btnExecuteEncode.Location = new System.Drawing.Point(473, 68);
+            this.btnExecuteEncode.Location = new System.Drawing.Point(473, 63);
             this.btnExecuteEncode.Name = "btnExecuteEncode";
             this.btnExecuteEncode.Size = new System.Drawing.Size(74, 23);
             this.btnExecuteEncode.TabIndex = 7;
@@ -206,7 +219,7 @@
             // 
             this.chkOutputArchivedFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.chkOutputArchivedFile.AutoSize = true;
-            this.chkOutputArchivedFile.Location = new System.Drawing.Point(3, 72);
+            this.chkOutputArchivedFile.Location = new System.Drawing.Point(3, 67);
             this.chkOutputArchivedFile.Name = "chkOutputArchivedFile";
             this.chkOutputArchivedFile.Size = new System.Drawing.Size(104, 16);
             this.chkOutputArchivedFile.TabIndex = 8;
@@ -220,7 +233,7 @@
             this.tpgDecode.Location = new System.Drawing.Point(4, 26);
             this.tpgDecode.Name = "tpgDecode";
             this.tpgDecode.Padding = new System.Windows.Forms.Padding(3);
-            this.tpgDecode.Size = new System.Drawing.Size(556, 106);
+            this.tpgDecode.Size = new System.Drawing.Size(556, 98);
             this.tpgDecode.TabIndex = 1;
             this.tpgDecode.Text = "File Decode";
             this.tpgDecode.UseVisualStyleBackColor = true;
@@ -244,11 +257,12 @@
             this.tlpDecode.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpDecode.Location = new System.Drawing.Point(3, 3);
             this.tlpDecode.Name = "tlpDecode";
-            this.tlpDecode.RowCount = 3;
+            this.tlpDecode.RowCount = 4;
+            this.tlpDecode.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tlpDecode.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tlpDecode.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tlpDecode.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpDecode.Size = new System.Drawing.Size(550, 100);
+            this.tlpDecode.Size = new System.Drawing.Size(550, 92);
             this.tlpDecode.TabIndex = 1;
             // 
             // labDecodeFileName
@@ -302,7 +316,7 @@
             this.txtDecodeMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.txtDecodeMessage.AutoSize = true;
             this.txtDecodeMessage.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.txtDecodeMessage.Location = new System.Drawing.Point(113, 74);
+            this.txtDecodeMessage.Location = new System.Drawing.Point(113, 69);
             this.txtDecodeMessage.Name = "txtDecodeMessage";
             this.txtDecodeMessage.Size = new System.Drawing.Size(354, 12);
             this.txtDecodeMessage.TabIndex = 4;
@@ -334,7 +348,7 @@
             // 
             this.btnExecuteDecode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.btnExecuteDecode.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.btnExecuteDecode.Location = new System.Drawing.Point(473, 68);
+            this.btnExecuteDecode.Location = new System.Drawing.Point(473, 63);
             this.btnExecuteDecode.Name = "btnExecuteDecode";
             this.btnExecuteDecode.Size = new System.Drawing.Size(74, 23);
             this.btnExecuteDecode.TabIndex = 7;
@@ -359,11 +373,46 @@
             this.dlgSelectDecodeFile.SupportMultiDottedExtensions = true;
             this.dlgSelectDecodeFile.Title = "Please select file to decode";
             // 
+            // chkOutputSplit
+            // 
+            this.chkOutputSplit.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.chkOutputSplit.AutoSize = true;
+            this.chkOutputSplit.Location = new System.Drawing.Point(127, 67);
+            this.chkOutputSplit.Name = "chkOutputSplit";
+            this.chkOutputSplit.Size = new System.Drawing.Size(80, 16);
+            this.chkOutputSplit.TabIndex = 9;
+            this.chkOutputSplit.Text = "Output Split";
+            this.chkOutputSplit.UseVisualStyleBackColor = true;
+            this.chkOutputSplit.CheckedChanged += new System.EventHandler(this.chkOutputSplit_CheckedChanged);
+            // 
+            // txtSplitSize
+            // 
+            this.txtSplitSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtSplitSize.Enabled = false;
+            this.txtSplitSize.Location = new System.Drawing.Point(213, 64);
+            this.txtSplitSize.MaxLength = 4;
+            this.txtSplitSize.Name = "txtSplitSize";
+            this.txtSplitSize.Size = new System.Drawing.Size(42, 22);
+            this.txtSplitSize.TabIndex = 10;
+            this.txtSplitSize.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtSplitSize.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtSplitSize_KeyPress);
+            // 
+            // labSplitText
+            // 
+            this.labSplitText.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.labSplitText.AutoSize = true;
+            this.labSplitText.Location = new System.Drawing.Point(261, 69);
+            this.labSplitText.Name = "labSplitText";
+            this.labSplitText.Size = new System.Drawing.Size(21, 12);
+            this.labSplitText.TabIndex = 11;
+            this.labSplitText.Text = "KB";
+            this.labSplitText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(564, 136);
+            this.ClientSize = new System.Drawing.Size(564, 128);
             this.Controls.Add(this.tbcMain);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
@@ -409,6 +458,9 @@
         private System.Windows.Forms.FolderBrowserDialog dlgSelectOutputPath;
         private System.Windows.Forms.OpenFileDialog dlgSelectDecodeFile;
         private System.Windows.Forms.CheckBox chkOutputArchivedFile;
+        private System.Windows.Forms.CheckBox chkOutputSplit;
+        private System.Windows.Forms.TextBox txtSplitSize;
+        private System.Windows.Forms.Label labSplitText;
 
     }
 }

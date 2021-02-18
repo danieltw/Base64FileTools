@@ -3,6 +3,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Windows.Forms;
+using System.Linq;
+
 
 namespace Base64FileTools
 {
@@ -56,9 +58,17 @@ namespace Base64FileTools
         private void btnExecuteEncode_Click(object sender, EventArgs e)
         {
             if (txtEncodeFileName.Text == "" || txtEncodeOutputPath.Text == "") return;
+            if (chkOutputSplit.Checked)
+            {
+                if (string.IsNullOrWhiteSpace(txtSplitSize.Text) || (Convert.ToInt32(txtSplitSize.Text.Trim()) < 5) || (Convert.ToInt32(txtSplitSize.Text.Trim()) > 5000))
+                {
+                    MessageBox.Show("Split Size MUST between 5 and 5000.");
+                    return;
+                }
+            }
 
             btnExecuteEncode.Enabled = false;
-            Thread trdEncode = new Thread(() => ConvertToBase64(chkOutputArchivedFile.Checked));
+            Thread trdEncode = new Thread(() => ConvertToBase64(chkOutputArchivedFile.Checked, chkOutputSplit.Checked));
             trdEncode.Start();
         }
 
@@ -104,8 +114,16 @@ namespace Base64FileTools
             }
         }
 
-        private void ConvertToBase64(bool OutputZip)
+        private void ConvertToBase64(bool OutputZip, bool OutputSplit)
         {
+            int splitSize = 5;
+            if (OutputSplit)
+            {
+                Int32.TryParse(txtSplitSize.Text, out splitSize);
+                if (splitSize < 5) splitSize = 5;
+                if (splitSize > 5000) splitSize = 5000;
+            }
+
             try
             {
                 UpdateEncodeMessageText("");
@@ -118,11 +136,41 @@ namespace Base64FileTools
                     {
                         using (ZipArchive tmpZipFile = new ZipArchive(_ms, ZipArchiveMode.Create))
                         {
-                            ZipArchiveEntry tmpEntry = tmpZipFile.CreateEntry(EncodeFileName + ".txt");
-                            using (Stream _stm = tmpEntry.Open())
+                            if (OutputSplit)
                             {
                                 byte[] _bufferData = System.Text.Encoding.ASCII.GetBytes(_TargetContentText);
-                                _stm.Write(_bufferData, 0, _bufferData.Length);
+                                int _loadSize = splitSize * 1024;
+
+                                int _totalFileCount = _bufferData.Length / _loadSize + (_bufferData.Length % _loadSize > 0 ? 1 : 0);
+
+                                string _fillText = "";
+                                for (int i = 0; i < _totalFileCount.ToString().Length; i++) { _fillText += "0"; }
+
+                                int _CT = 0;
+                                int _LeftLength = _bufferData.Length;
+                                while (_LeftLength > 0)
+                                {
+                                    ZipArchiveEntry tmpEntry = tmpZipFile.CreateEntry(EncodeFileName + "_" + _CT.ToString(_fillText) + ".txt");
+                                    using (Stream _stm = tmpEntry.Open())
+                                    {
+                                        if (_loadSize > _LeftLength)
+                                            _stm.Write(_bufferData.Skip(_CT * _loadSize).Take(_LeftLength).ToArray(), 0, _LeftLength);
+                                        else
+                                            _stm.Write(_bufferData.Skip(_CT * _loadSize).Take(_loadSize).ToArray(), 0, _loadSize);
+
+                                        _LeftLength -= _loadSize;
+                                        _CT++;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                ZipArchiveEntry tmpEntry = tmpZipFile.CreateEntry(EncodeFileName + ".txt");
+                                using (Stream _stm = tmpEntry.Open())
+                                {
+                                    byte[] _bufferData = System.Text.Encoding.ASCII.GetBytes(_TargetContentText);
+                                    _stm.Write(_bufferData, 0, _bufferData.Length);
+                                }
                             }
                         }
                         System.IO.File.WriteAllBytes(_TargetFileName, _ms.ToArray());
@@ -130,9 +178,36 @@ namespace Base64FileTools
                 }
                 else
                 {
-                    string _TargetFileName = txtEncodeOutputPath.Text + (txtEncodeOutputPath.Text.EndsWith("\\") ? "" : "\\") + EncodeFileName + ".txt";
-                    byte[] _Buffer = System.Text.Encoding.ASCII.GetBytes(_TargetContentText);
-                    System.IO.File.WriteAllBytes(_TargetFileName, _Buffer);
+                    if (OutputSplit)
+                    {
+                        byte[] _bufferData = System.Text.Encoding.ASCII.GetBytes(_TargetContentText);
+                        int _loadSize = splitSize * 1024;
+                        int _totalFileCount = _bufferData.Length / _loadSize + (_bufferData.Length % _loadSize > 0 ? 1 : 0);
+
+                        string _fillText = "";
+                        for (int i = 0; i < _totalFileCount.ToString().Length; i++) { _fillText += "0"; }
+
+                        int _CT = 0;
+                        int _LeftLength = _bufferData.Length;
+                        while (_LeftLength > 0)
+                        {
+                            string _tmpFileName = txtEncodeOutputPath.Text + (txtEncodeOutputPath.Text.EndsWith("\\") ? "" : "\\") + EncodeFileName + "_" + _CT.ToString(_fillText) + ".txt";
+
+                            if (_loadSize > _LeftLength)
+                                System.IO.File.WriteAllBytes(_tmpFileName, _bufferData.Skip(_CT * _loadSize).Take(_LeftLength).ToArray());
+                            else
+                                System.IO.File.WriteAllBytes(_tmpFileName, _bufferData.Skip(_CT * _loadSize).Take(_loadSize).ToArray());
+
+                            _LeftLength -= _loadSize;
+                            _CT++;
+                        }
+                    }
+                    else
+                    {
+                        string _TargetFileName = txtEncodeOutputPath.Text + (txtEncodeOutputPath.Text.EndsWith("\\") ? "" : "\\") + EncodeFileName + ".txt";
+                        byte[] _Buffer = System.Text.Encoding.ASCII.GetBytes(_TargetContentText);
+                        System.IO.File.WriteAllBytes(_TargetFileName, _Buffer);
+                    }
                 }
                 UpdateEncodeMessageText("Info : Encode Successfull.");
             }
@@ -305,5 +380,19 @@ namespace Base64FileTools
             }
         }
         #endregion
+
+        private void chkOutputSplit_CheckedChanged(object sender, EventArgs e)
+        {
+            txtSplitSize.Text = "";
+            txtSplitSize.Enabled = chkOutputSplit.Checked;
+        }
+
+        private void txtSplitSize_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (((e.KeyChar > 47) && (e.KeyChar < 58)) || (e.KeyChar == 8))
+                e.Handled = false;
+            else
+                e.Handled = true;
+        }
     }
 }
